@@ -1,0 +1,7 @@
+# El symlink definiciones/ apunta fuera del repo (a ~/.claude/enfoque/).
+# Git versiona el symlink en sí, no el target. Nada que ignorar ahí.
+
+# Temporales y locales
+*.tmp
+*.bak
+.DS_Store
