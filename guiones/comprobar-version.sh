@@ -10,7 +10,7 @@
 set -uo pipefail
 
 DIR_REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-VERSION_LOCAL="$(cat "$DIR_REPO/VERSIÓN" 2>/dev/null | tr -d '[:space:]')"
+VERSION_LOCAL="$(tr -d '[:space:]' < "$DIR_REPO/VERSIÓN" 2>/dev/null)"
 
 cd "$DIR_REPO" || exit 0
 

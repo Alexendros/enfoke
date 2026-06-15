@@ -19,7 +19,7 @@ El concepto nació en el entorno `~/.claude/` de Alexendros y se usa con éxito 
 - **Enfoque** = _cómo trabajo y entrego_ (este repo).
 - **Verbosidad** = _cuánto comunico_ (eje separado).
 
-Ambos ejes son independientes: cualquier Enfoque combina con cualquier verbosidad.
+Ambos ejes son independientes: cualquier Enfoque combina con cualquier verbosidad. La Verbosidad es un eje separado y **no se entrega en este repositorio** (aquí solo viven los Enfoques).
 
 ## Repositorio integral — clonar es tener
 
@@ -70,14 +70,18 @@ enfoques/
 │   ├── CONCEPTO.md         ← doctrina extendida (origen, anatomía, adhesión)
 │   └── PLANTILLA-enfoque.md← plantilla para crear un Enfoque nuevo
 ├── guiones/
-│   └── comprobar-version.sh← compara versión local vs remoto validado (online)
-└── enganches/
-    └── enganche-version.sh ← aviso inerte si la copia local quedó por detrás del online
+│   ├── comprobar-version.sh← compara versión local vs remoto validado (online)
+│   └── validar.sh          ← valida integridad del catálogo (frontmatter, versión, referencias)
+├── enganches/
+│   └── enganche-version.sh ← aviso inerte si la copia local quedó por detrás del online
+└── .github/
+    └── workflows/
+        └── validar.yml     ← CI: shellcheck + validar.sh en cada push/PR
 ```
 
 ## Cómo lo consume Claude Code (el harness)
 
-El motor `~/.claude/scripts/set-layer.sh` lee las definiciones **directamente de este repo** (`complementos/enfoques/definiciones/`). No hay copias en `~/.claude/`: el motor se adapta al repo, no al revés.
+El motor vive en el harness (`~/.claude/`), **no en este repo**, y lee las definiciones **directamente de este repo** desde donde se clone (la carpeta `definiciones/`). No hay copias en `~/.claude/`: el motor se adapta al repo, no al revés.
 
 ```
 /enfoque list           # lista los Enfoques (desde definiciones/)
@@ -87,7 +91,7 @@ El motor `~/.claude/scripts/set-layer.sh` lee las definiciones **directamente de
 /enfoque off            # vuelve al comportamiento nativo
 ```
 
-El cambio surte efecto en el **siguiente turno** (lo inyecta un hook `UserPromptSubmit`), sin `/clear`.
+El cambio surte efecto en el **siguiente turno**: un hook `UserPromptSubmit` reinyecta el cuerpo del Enfoque activo como `additionalContext` (mecanismo oficial documentado en [Claude Code hooks](https://code.claude.com/docs/en/hooks)), sin `/clear`.
 
 ## Versionado y sincronización
 
@@ -95,6 +99,7 @@ El cambio surte efecto en el **siguiente turno** (lo inyecta un hook `UserPrompt
 - La rama por defecto de `origin` (GitHub) es la referencia "online" validada.
 - `guiones/comprobar-version.sh` compara la versión local contra la del remoto validado.
 - `enganches/enganche-version.sh` avisa si el local quedó por detrás del online — **inerte mientras no exista `origin`** (no molesta durante el desarrollo).
+- `guiones/validar.sh` valida la integridad del catálogo (frontmatter, formato de `VERSIÓN`, referencias cruzadas); lo ejecuta también la CI de GitHub Actions en cada push y PR.
 
 ## Crear o modificar un Enfoque
 
@@ -102,6 +107,7 @@ Desde el IDE (Windsurf), abriendo este repo:
 
 1. Copia `documentacion/PLANTILLA-enfoque.md` a `definiciones/<palabra>.md`.
 2. Rellena frontmatter (`name`, `description`, `keep-coding-instructions: true`) y cuerpo.
-3. Crea el atajo en `~/.claude/commands/<palabra>.md` (apunta a `set-layer.sh enfoque <palabra>`).
-4. Sube `VERSIÓN` (PATCH si es retoque, MINOR si es Enfoque nuevo).
-5. Commit + push a GitHub.
+3. Crea el atajo `/<palabra>` en el harness. La vía recomendada hoy son los [skills](https://code.claude.com/docs/en/skills) (`~/.claude/skills/<palabra>/SKILL.md`); el formato legacy `~/.claude/commands/<palabra>.md` sigue funcionando.
+4. Pasa el validador: `bash guiones/validar.sh`.
+5. Sube `VERSIÓN` (PATCH si es retoque, MINOR si es Enfoque nuevo).
+6. Commit + push a GitHub.
