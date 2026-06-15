@@ -1,0 +1,21 @@
+name: Validar catálogo
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Lint de scripts (shellcheck)
+        run: shellcheck guiones/*.sh enganches/*.sh
+
+      - name: Validar integridad del catálogo
+        run: bash guiones/validar.sh

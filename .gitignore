@@ -1,5 +1,5 @@
-# El symlink definiciones/ apunta fuera del repo (a ~/.claude/enfoque/).
-# Git versiona el symlink en sí, no el target. Nada que ignorar ahí.
+# definiciones/ contiene ficheros .md reales versionados por git (la fuente de
+# verdad del catálogo). El repo es autocontenido: nada de symlinks externos.
 
 # Temporales y locales
 *.tmp

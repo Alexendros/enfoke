@@ -4,7 +4,7 @@
 
 ## Origen
 
-El sistema Enfoques surgió en `~/.claude/` como respuesta a un problema concreto: el comportamiento por defecto de Claude Code (su "output style") se carga **una sola vez al inicio de sesión** y cambiarlo requería `/clear` o reinicio. Eso hacía inviable adaptar la actitud del agente a la tarea sobre la marcha.
+El sistema Enfoques surgió en `~/.claude/` como respuesta a un problema concreto: el comportamiento por defecto de Claude Code (su "output style") forma parte del prompt de sistema y se carga **una sola vez al inicio de sesión** (por la caché de prompt), y cambiarlo requería `/clear` o reinicio. Eso hacía inviable adaptar la actitud del agente a la tarea sobre la marcha.
 
 La solución fue desacoplar la *actitud* del *arranque*: definir cada actitud como un artefacto independiente y reinyectarla por turno mediante un hook `UserPromptSubmit`. Así nació el eje **Enfoque**, y por simetría el eje **verbosidad**.
 
@@ -13,9 +13,9 @@ La solución fue desacoplar la *actitud* del *arranque*: definir cada actitud co
 | Eje            | Pregunta que responde      | Ejemplos                       |
 | -------------- | -------------------------- | ------------------------------ |
 | **Enfoque**    | ¿*Cómo* trabajo y entrego? | Rustir, Desarrollador, Entrega |
-| **Verbosidad** | ¿*Cuánto* comunico?        | Modo Funcionario Gris          |
+| **Verbosidad** | ¿*Cuánto* comunico?        | (eje separado, fuera de este repo) |
 
-Son independientes: el Enfoque define la *postura* (crítico, ejecutor, planificador), la verbosidad define el *volumen* (lacónico, detallado). Se combinan libremente.
+Son independientes: el Enfoque define la *postura* (crítico, ejecutor, planificador), la verbosidad define el *volumen* (lacónico, detallado). Se combinan libremente. Este repositorio entrega únicamente el eje **Enfoque**; la Verbosidad se gestiona aparte y no se define aquí.
 
 ## Anatomía de un Enfoque
 
@@ -25,9 +25,11 @@ Cada Enfoque es un `.md` con frontmatter + cuerpo estructurado:
 ---
 name: <Nombre legible>           # identificador que muestra el CLI como estilo activo
 description: <una línea>          # qué hace; se ve en la lista de comandos
-keep-coding-instructions: true   # conserva las instrucciones base de coding del CLI
+keep-coding-instructions: true   # convención que lee el motor local; conserva las instrucciones base de coding del CLI
 ---
 ```
+
+> `keep-coding-instructions` no es una clave oficial del frontmatter de Claude Code: es una convención que interpreta el motor del harness al componer el `additionalContext`. Las claves oficiales de un output style son `name` y `description`.
 
 El cuerpo sigue un patrón probado:
 
@@ -50,9 +52,9 @@ El cuerpo sigue un patrón probado:
 
 ## Adhesión — por qué el Enfoque "manda"
 
-El hook `prompt-context-router.sh` inyecta el cuerpo del Enfoque activo como `additionalContext` con un encabezado que declara prioridad sobre el output style de arranque. Mientras `active-enfoque.md` exista y tenga contenido, su comportamiento prevalece. `set-layer.sh enfoque off` borra ese fichero y el agente vuelve al nativo.
+El hook `UserPromptSubmit` del harness inyecta, en cada turno, el cuerpo del Enfoque activo como `additionalContext` con un encabezado que declara prioridad sobre el output style de arranque. Mientras el Enfoque esté activo, su comportamiento prevalece; `/enfoque off` lo retira y el agente vuelve al nativo. (Estos scripts del motor viven en `~/.claude/`, no en este repo.)
 
-Esto **no** es coerción a nivel de modelo (ningún hook puede forzar tokens concretos), sino reinyección de instrucciones de alta prioridad en cada turno. La adhesión es tan fuerte como la disciplina del agente para seguir instrucciones de sistema — que en Claude Code es alta.
+Esto **no** es coerción a nivel de modelo (ningún hook puede forzar tokens concretos: los hooks operan en la capa de orquestación, no en la generación de tokens), sino reinyección de instrucciones de alta prioridad en cada turno. La adhesión es tan fuerte como la disciplina del agente para seguir instrucciones de sistema — que en Claude Code es alta.
 
 ## Líneas rojas comunes a todos los Enfoques
 
