@@ -54,7 +54,7 @@ Flujo operativo natural: **decidir** (1) → **automatizar** (2) → **probar** 
 
 ## Estructura del repositorio
 
-```
+```text
 enfoques/
 ├── LÉEME.md                ← este documento (README.md redirige aquí)
 ├── VERSIÓN                 ← versión semántica del catálogo
@@ -83,7 +83,7 @@ enfoques/
 
 El motor vive en el harness (`~/.claude/`), **no en este repo**, y lee las definiciones **directamente de este repo** desde donde se clone (la carpeta `definiciones/`). No hay copias en `~/.claude/`: el motor se adapta al repo, no al revés.
 
-```
+```text
 /enfoque list           # lista los Enfoques (desde definiciones/)
 /enfoque <palabra>      # activa (ej. /enfoque rustir)
 /rustir                 # atajo suelto equivalente

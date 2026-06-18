@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+# NOTA: el lint y el chequeo de enlaces se limitan a los DOCS DE PROYECTO
+# (ficheros canónicos en raíz + docs/ + .github/). El contenido de autor
+# (p.ej. definiciones/, documentacion/, contenido específico del repo) NO se
+# lintea: es prosa, no documentación de proyecto, y aplicarle reglas de estilo
+# markdown genera ruido sin valor. Si un repo docs-only quiere lintar también
+# su contenido, que amplíe los globs en su propia copia.
+jobs:
+  markdownlint:
+    name: markdownlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: DavidAnson/markdownlint-cli2-action@v23.2.0
+        with:
+          globs: |
+            *.md
+            docs/**/*.md
+            .github/**/*.md
+
+  link-check:
+    name: link-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: lycheeverse/lychee-action@v2.8.0
+        with:
+          args: --verbose --no-progress --exclude-loopback './*.md' './docs/**/*.md' './.github/**/*.md'
+          fail: true
+          # failIfEmpty por defecto es true: marcaría fallo si los globs no
+          # contienen ningún enlace (repo docs pequeño sin enlaces externos).
+          # Lo desactivamos: "sin enlaces" no es un error.
+          failIfEmpty: false
