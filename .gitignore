@@ -1,7 +1,26 @@
 # El symlink definiciones/ apunta fuera del repo (a ~/.claude/enfoque/).
 # Git versiona el symlink en sí, no el target. Nada que ignorar ahí.
 
-# Temporales y locales
-*.tmp
-*.bak
+# OS
 .DS_Store
+Thumbs.db
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Backups y temporales
+*.bak
+*.tmp
+*~
+
+# Generadores de sites estáticos (si en algún momento se añade)
+_site/
+public/
+.cache/
+
+# Claude Code project-scope
+.claude/cache/
+.claude/history/
+.claude/settings.local.json
